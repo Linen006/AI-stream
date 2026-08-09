@@ -1,0 +1,3 @@
+﻿id,video_id,question,intent,status,wechat_status,template,next_followup,owner,priority,updated_at,remark
+L001,V001,这个清洗方便吗,高,已跟进,已加微,清洗话术V1,2026-07-22,周七,高,2026-07-21,重点跟进
+L002,V003,一杯够几个人喝,中,待回复,未加微,容量话术V1,2026-07-23,周七,中,2026-07-21,尽快回复
