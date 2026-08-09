@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI短视频电商提效系统</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --panel: #ffffff;
+      --line: #dde3ea;
+      --text: #1f2937;
+      --muted: #64748b;
+      --teal: #0f766e;
+      --teal-soft: #e6f4f2;
+      --blue: #2563eb;
+      --blue-soft: #eaf1fe;
+      --amber: #b45309;
+      --amber-soft: #fff4e0;
+      --red: #b91c1c;
+      --red-soft: #fdecec;
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(16, 24, 40, .08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.55 "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+    button { font: inherit; }
+
+    .app-bar {
+      background: #101828;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand-icon {
+      width: 34px; height: 34px; flex: 0 0 34px;
+      border-radius: var(--radius);
+      background: #0f766e;
+      display: grid; place-items: center;
+    }
+    .brand h1 {
+      margin: 0; font-size: 16px; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .brand small { display: block; color: #9aa5b1; font-size: 12px; font-weight: 400; }
+    .status-chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .chip {
+      border-radius: 999px; padding: 4px 10px; font-size: 12px;
+      background: #1f2a37; color: #d1d5db; white-space: nowrap;
+    }
+    .chip.ok { background: #123f3a; color: #7ee2d8; }
+    .chip.mock { background: #3f2d12; color: #f5c77e; }
+
+    .tabs {
+      display: flex; gap: 4px; padding: 10px 20px 0;
+      background: var(--panel); border-bottom: 1px solid var(--line);
+      position: sticky; top: 58px; z-index: 15;
+      overflow-x: auto;
+    }
+    .tab {
+      border: 0; background: transparent; color: var(--muted);
+      padding: 10px 14px; cursor: pointer; white-space: nowrap;
+      display: flex; align-items: center; gap: 6px;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--teal); }
+    .tab.active { color: var(--teal); border-bottom-color: var(--teal); font-weight: 600; }
+    .tab svg { width: 16px; height: 16px; flex: 0 0 16px; }
+
+    main { max-width: 1180px; margin: 0 auto; padding: 18px 20px 76px; }
+    section.view { display: none; }
+    section.view.active { display: block; }
+
+    .panel {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 16px; margin-bottom: 16px;
+    }
+    .panel h2 {
+      margin: 0 0 12px; font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .panel h2 .hint { color: var(--muted); font-size: 12px; font-weight: 400; }
+
+    .stats {
+      display: grid; gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    .stat {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--panel); padding: 14px 16px;
+    }
+    .stat .label { color: var(--muted); font-size: 12px; }
+    .stat .value { font-size: 24px; font-weight: 700; margin-top: 4px; }
+    .stat .value.teal { color: var(--teal); }
+    .stat .value.blue { color: var(--blue); }
+    .stat .value.amber { color: var(--amber); }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn {
+      border: 1px solid var(--line); background: var(--panel); color: var(--text);
+      border-radius: var(--radius); padding: 9px 14px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 7px;
+      transition: background .15s ease, border-color .15s ease;
+    }
+    .btn:hover { border-color: var(--teal); color: var(--teal); }
+    .btn.primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .btn.primary:hover { background: #0c635c; }
+    .btn.ghost { border-color: transparent; background: transparent; color: var(--blue); }
+    .btn.ghost:hover { color: #1e40af; }
+    .btn svg { width: 15px; height: 15px; }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+
+    .form-grid {
+      display: grid; gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    input, select, textarea {
+      width: 100%; border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 9px 10px; background: #fff; color: var(--text);
+      font: inherit;
+    }
+    textarea { min-height: 88px; resize: vertical; }
+    .check { display: inline-flex; align-items: center; gap: 8px; color: var(--text); cursor: pointer; }
+    .check input { width: auto; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-size: 12px; font-weight: 600; background: #f8fafc; }
+    tr:last-child td { border-bottom: 0; }
+    td .tag {
+      display: inline-block; border-radius: 999px; padding: 2px 8px;
+      background: var(--teal-soft); color: var(--teal); font-size: 12px;
+    }
+
+    .result-box {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: #f8fafc; padding: 12px; margin-top: 12px;
+    }
+    .result-box .meta { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    pre {
+      margin: 0; white-space: pre-wrap; word-break: break-word;
+      font: 13px/1.6 Consolas, "Courier New", monospace;
+    }
+
+    .kb-grid {
+      display: grid; gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    details.kb-card {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--panel); padding: 12px 14px;
+    }
+    details.kb-card summary { cursor: pointer; font-weight: 600; list-style: none; }
+    details.kb-card summary::-webkit-details-marker { display: none; }
+    details.kb-card .meta { color: var(--muted); font-size: 12px; margin: 6px 0; }
+    details.kb-card .prompt {
+      background: #f8fafc; border-radius: var(--radius);
+      padding: 10px; white-space: pre-wrap; font-size: 13px;
+    }
+
+    .task-bar {
+      position: fixed; left: 0; right: 0; bottom: 0;
+      background: #101828; color: #e5e7eb; padding: 10px 20px;
+      display: none; align-items: center; gap: 12px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,.2); z-index: 30;
+      font-size: 13px;
+    }
+    .task-bar.show { display: flex; }
+    .task-bar .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #f5c77e; flex: 0 0 10px;
+    }
+    .task-bar .dot.done { background: #34d399; }
+    .task-bar .dot.failed { background: #f87171; }
+    .task-bar .msg { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .task-bar pre {
+      max-height: 130px; overflow: auto; width: 100%;
+      font-size: 12px; color: #cbd5e1;
+    }
+
+    .empty { color: var(--muted); padding: 24px 0; text-align: center; }
+    .error-box {
+      border: 1px solid #fecaca; background: var(--red-soft);
+      color: var(--red); border-radius: var(--radius); padding: 10px 12px; margin-top: 12px;
+    }
+
+    @media (max-width: 720px) {
+      .app-bar { padding: 10px 14px; }
+      .brand h1 { font-size: 14px; }
+      .status-chips { display: none; }
+      .tabs { top: 54px; padding: 8px 12px 0; }
+      main { padding: 14px 12px 90px; }
+      .stat .value { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-bar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2">
+          <rect x="3" y="4" width="18" height="14" rx="2"></rect>
+          <path d="M8 2v4M16 2v4M3 10h18M10 15l2-2 2 2"></path>
+        </svg>
+      </div>
+      <div>
+        <h1>AI短视频电商提效系统</h1>
+        <small>选品 · 内容 · 脚本 · 投流 · 复盘 · 知识库</small>
+      </div>
+    </div>
+    <div class="status-chips">
+      <span class="chip" id="apiChip">API 检测中</span>
+      <span class="chip mock" id="mockChip">离线演示</span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-view="overview">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+      概览
+    </button>
+    <button class="tab" data-view="products">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+      商品库
+    </button>
+    <button class="tab" data-view="agent">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7c0 2.4-1.2 4.5-3 5.7V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.3C6.2 13.5 5 11.4 5 9a7 7 0 0 1 7-7z"/><path d="M9 21h6"/></svg>
+      脚本助手
+    </button>
+    <button class="tab" data-view="workflow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="6" height="6" rx="1"/><rect x="16" y="4" width="6" height="6" rx="1"/><rect x="9" y="14" width="6" height="6" rx="1"/><path d="M8 7h8M5 10v2a2 2 0 0 0 2 2h2M19 10v2a2 2 0 0 1-2 2h-2"/></svg>
+      AI工作流
+    </button>
+    <button class="tab" data-view="analysis">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-5 3 3 5-7"/></svg>
+      数据复盘
+    </button>
+    <button class="tab" data-view="knowledge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      知识库
+    </button>
+  </nav>
+
+  <main>
+    <section class="view active" id="view-overview">
+      <div class="stats" id="overviewStats">
+        <div class="stat"><div class="label">商品数</div><div class="value" id="statProducts">-</div></div>
+        <div class="stat"><div class="label">脚本数</div><div class="value" id="statScripts">-</div></div>
+        <div class="stat"><div class="label">视频数</div><div class="value" id="statVideos">-</div></div>
+        <div class="stat"><div class="label">投放成本</div><div class="value amber" id="statCost">-</div></div>
+        <div class="stat"><div class="label">总成交</div><div class="value blue" id="statRevenue">-</div></div>
+        <div class="stat"><div class="label">整体ROI</div><div class="value teal" id="statRoi">-</div></div>
+      </div>
+      <div class="panel">
+        <h2>快速开始 <span class="hint">三个模块共用同一套服务与数据表</span></h2>
+        <div class="actions">
+          <button class="btn" data-go="products">查看商品库</button>
+          <button class="btn primary" data-go="agent">生成带货脚本</button>
+          <button class="btn primary" data-go="workflow">跑完整工作流</button>
+          <button class="btn primary" data-go="analysis">执行数据复盘</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-products">
+      <div class="panel">
+        <h2>商品库 <span class="hint">数据来源 data/products.csv</span></h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>编号</th><th>商品</th><th>类目</th><th>价格</th>
+                <th>热度</th><th>目标人群</th><th>核心卖点</th><th>状态</th><th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="productsBody"><tr><td colspan="9" class="empty">加载中...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-agent">
+      <div class="panel">
+        <h2>脚本生成助手 <span class="hint">输入商品名，AI 自动分析并生成 30 秒脚本</span></h2>
+        <form id="agentForm">
+          <div class="form-grid">
+            <div>
+              <label for="agentName">商品名称 *</label>
+              <input id="agentName" placeholder="如：便携式无线榨汁杯" required maxlength="50">
+            </div>
+            <div>
+              <label for="agentAudience">目标人群（选填）</label>
+              <input id="agentAudience" placeholder="AI 自动分析">
+            </div>
+            <div>
+              <label for="agentScenario">使用场景（选填）</label>
+              <input id="agentScenario" placeholder="AI 自动分析">
+            </div>
+            <div>
+              <label for="agentSell">核心卖点（选填）</label>
+              <input id="agentSell" placeholder="AI 自动分析">
+            </div>
+          </div>
+          <div class="actions" style="margin-top:12px">
+            <label class="check"><input type="checkbox" id="agentMock"> 离线演示（不调用 API）</label>
+            <button class="btn primary" type="submit" id="agentRunBtn">开始生成</button>
+          </div>
+        </form>
+        <div id="agentResult"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-workflow">
+      <div class="panel">
+        <h2>AI 工作流 <span class="hint">商品 → 卖点 → 内容角度 → 脚本分镜 → 质检 → 真实回写</span></h2>
+        <form id="workflowForm">
+          <div class="form-grid">
+            <div>
+              <label for="workflowProduct">选择商品</label>
+              <select id="workflowProduct"></select>
+            </div>
+          </div>
+          <div class="actions" style="margin-top:12px">
+            <label class="check"><input type="checkbox" id="workflowMock"> 离线演示（不调用 API）</label>
+            <button class="btn primary" type="submit" id="workflowRunBtn">开始运行</button>
+          </div>
+        </form>
+        <div id="workflowResult"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-analysis">
+      <div class="panel">
+        <h2>数据复盘 <span class="hint">读取真实投流数据，AI 生成报告并回写 reviews 表</span></h2>
+        <div class="actions">
+          <label class="check"><input type="checkbox" id="analysisMock"> 离线演示（不调用 API）</label>
+          <button class="btn primary" id="analysisRunBtn">执行复盘</button>
+        </div>
+        <div id="analysisResult"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-knowledge">
+      <div class="panel">
+        <h2>知识库 <span class="hint">提示词即资产：可检索、可版本管理，供工作流/智能体/复盘加载</span></h2>
+        <div class="kb-grid" id="knowledgeGrid"><div class="empty">加载中...</div></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="task-bar" id="taskBar">
+    <span class="dot" id="taskDot"></span>
+    <span class="msg" id="taskMsg">任务运行中...</span>
+    <pre id="taskLogs"></pre>
+  </div>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+    const state = { active: 'overview', renderers: {}, tasks: {} };
+
+    async function apiGet(url) {
+      const r = await fetch(url);
+      return r.json();
+    }
+    async function apiPost(url, body) {
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body || {})
+      });
+      return r.json();
+    }
+
+    function switchView(name) {
+      state.active = name;
+      document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.view === name));
+      document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === 'view-' + name));
+      if (name === 'overview') loadOverview();
+      if (name === 'products') loadProducts();
+      if (name === 'workflow') loadWorkflowProducts();
+      if (name === 'knowledge') loadKnowledge();
+    }
+
+    async function loadHealth() {
+      try {
+        const d = await apiGet('/api/health');
+        $('#apiChip').textContent = d.api_ready ? 'API 已配置' : '未配置 API Key';
+        $('#apiChip').className = 'chip' + (d.api_ready ? ' ok' : '');
+        $('#mockChip').style.display = d.mock_ai ? '' : 'none';
+      } catch (e) {
+        $('#apiChip').textContent = '服务未连接';
+      }
+    }
+
+    async function loadOverview() {
+      try {
+        const d = await apiGet('/api/overview');
+        $('#statProducts').textContent = d.products;
+        $('#statScripts').textContent = d.scripts;
+        $('#statVideos').textContent = d.videos;
+        $('#statCost').textContent = '¥' + d.total_cost.toLocaleString();
+        $('#statRevenue').textContent = '¥' + d.total_revenue.toLocaleString();
+        $('#statRoi').textContent = d.overall_roi;
+      } catch (e) {
+        $('#statProducts').textContent = '加载失败';
+      }
+    }
+
+    function productRow(p) {
+      return `<tr>
+        <td>${p.id}</td>
+        <td><strong>${p.name}</strong></td>
+        <td>${p.category}</td>
+        <td>${p.price}</td>
+        <td>${p.heat_score || '-'}</td>
+        <td>${p.target_audience || '-'}</td>
+        <td>${p.selling_points || '-'}</td>
+        <td><span class="tag">${p.status || '-'}</span></td>
+        <td>
+          <button class="btn ghost" data-name="${p.name}" data-action="agent">生成脚本</button>
+          <button class="btn ghost" data-id="${p.id}" data-action="workflow">跑工作流</button>
+        </td>
+      </tr>`;
+    }
+
+    async function loadProducts() {
+      try {
+        const d = await apiGet('/api/products');
+        $('#productsBody').innerHTML = d.products.length
+          ? d.products.map(productRow).join('')
+          : '<tr><td colspan="9" class="empty">暂无商品</td></tr>';
+      } catch (e) {
+        $('#productsBody').innerHTML = '<tr><td colspan="9" class="empty">加载失败</td></tr>';
+      }
+    }
+
+    async function loadWorkflowProducts() {
+      try {
+        const d = await apiGet('/api/products');
+        $('#workflowProduct').innerHTML = d.products
+          .map((p) => `<option value="${p.id}">${p.name}（${p.price}）</option>`)
+          .join('');
+      } catch (e) {
+        $('#workflowProduct').innerHTML = '<option>加载失败</option>';
+      }
+    }
+
+    async function loadKnowledge() {
+      try {
+        const d = await apiGet('/api/knowledge');
+        $('#knowledgeGrid').innerHTML = d.items.length
+          ? d.items.map((item) => `
+            <details class="kb-card">
+              <summary>${item.key} <span class="tag">${item.version || 'v1.0'}</span></summary>
+              <div class="meta">${item.category || ''} · ${item.description || ''}</div>
+              <div class="prompt"></div>
+            </details>`).join('')
+          : '<div class="empty">暂无提示词</div>';
+        d.items.forEach((item, idx) => {
+          const box = document.querySelectorAll('#knowledgeGrid details .prompt')[idx];
+          if (box) box.textContent = item.prompt || '';
+        });
+      } catch (e) {
+        $('#knowledgeGrid').innerHTML = '<div class="empty">加载失败</div>';
+      }
+    }
+
+    function startTask(taskId, renderer) {
+      state.renderers[taskId] = renderer;
+      state.tasks[taskId] = true;
+      showTaskBar('running');
+      pollTask(taskId);
+    }
+
+    function showTaskBar(status, taskId) {
+      const bar = $('#taskBar');
+      const dot = $('#taskDot');
+      const msg = $('#taskMsg');
+      const logs = $('#taskLogs');
+      if (status === 'running') {
+        bar.classList.add('show');
+        dot.className = 'dot';
+        msg.textContent = '任务运行中，请稍候...';
+        logs.textContent = '';
+      } else if (status === 'done') {
+        dot.className = 'dot done';
+        msg.textContent = '任务已完成';
+        const task = state.tasks[taskId];
+        if (task) logs.textContent = task.logs || '';
+        setTimeout(() => bar.classList.remove('show'), 5000);
+      } else if (status === 'failed') {
+        dot.className = 'dot failed';
+        msg.textContent = '任务失败';
+        const task = state.tasks[taskId];
+        if (task) logs.textContent = task.error || task.logs || '';
+        setTimeout(() => bar.classList.remove('show'), 8000);
+      }
+    }
+
+    async function pollTask(taskId) {
+      const d = await apiGet('/api/tasks?id=' + taskId);
+      const task = d.task;
+      if (!task) return;
+      state.tasks[taskId] = task;
+      if (task.status === 'running') {
+        setTimeout(() => pollTask(taskId), 1500);
+        return;
+      }
+      const renderer = state.renderers[taskId];
+      if (renderer) renderer(task);
+      showTaskBar(task.status, taskId);
+    }
+
+    function renderAgentResult(task) {
+      const box = $('#agentResult');
+      if (task.status === 'failed') {
+        box.innerHTML = `<div class="error-box">任务失败：${task.error}</div>`;
+        return;
+      }
+      const r = task.result || {};
+      box.innerHTML = `
+        <div class="result-box">
+          <div class="meta">脚本编号：${r.script_id || '-'} · 已保存：${r.saved_to || '-'}</div>
+          <strong>AI 商品分析</strong><pre></pre>
+          <div style="height:10px"></div>
+          <strong>智能体输出</strong><pre></pre>
+        </div>`;
+      const pres = box.querySelectorAll('pre');
+      pres[0].textContent = r.suggestion || '';
+      pres[1].textContent = r.result || '';
+    }
+
+    function renderWorkflowResult(task) {
+      const box = $('#workflowResult');
+      if (task.status === 'failed') {
+        box.innerHTML = `<div class="error-box">任务失败：${task.error}</div>`;
+        return;
+      }
+      const r = task.result || {};
+      box.innerHTML = `
+        <div class="result-box">
+          <div class="meta">商品：${r.product_name} · 脚本 ${r.script_id} · 内容 ${r.content_id} · 输出目录：${r.output_dir}</div>
+          <strong>工作流四步输出</strong>
+          <div id="workflowSteps"></div>
+        </div>`;
+      const holder = box.querySelector('#workflowSteps');
+      (r.steps || []).forEach((s) => {
+        const div = document.createElement('div');
+        const strong = document.createElement('strong');
+        strong.textContent = `步骤${s.step} ${s.title}`;
+        const pre = document.createElement('pre');
+        pre.textContent = s.content;
+        div.append(strong, pre);
+        holder.append(div);
+      });
+    }
+
+    function renderAnalysisResult(task) {
+      const box = $('#analysisResult');
+      if (task.status === 'failed') {
+        box.innerHTML = `<div class="error-box">任务失败：${task.error}</div>`;
+        return;
+      }
+      const r = task.result || {};
+      const head = `<tr><th>编号</th><th>视频</th><th>播放量</th><th>CTR%</th><th>转化率%</th><th>成交额</th><th>成本</th><th>ROI</th><th>跳出率%</th></tr>`;
+      const body = (r.rows || []).map((m) =>
+        `<tr><td>${m.video_id}</td><td>${m.video_name}</td><td>${m.views}</td><td>${m.ctr}</td><td>${m.conv}</td><td>${m.revenue}</td><td>${m.cost}</td><td>${m.roi}</td><td>${m.drop2s}</td></tr>`
+      ).join('');
+      box.innerHTML = `
+        <div class="result-box">
+          <div class="meta">复盘编号：${r.review_id || '-'} · 整体ROI：${r.overall_roi} · 已保存：${r.saved_to || '-'}</div>
+          <div class="table-wrap"><table>${head}${body}</table></div>
+          <div style="height:10px"></div>
+          <strong>AI 复盘报告</strong><pre></pre>
+        </div>`;
+      box.querySelector('pre').textContent = r.ai_report || '';
+    }
+
+    document.querySelectorAll('.tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        location.hash = tab.dataset.view;
+        switchView(tab.dataset.view);
+      });
+    });
+    document.querySelectorAll('[data-go]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        location.hash = btn.dataset.go;
+        switchView(btn.dataset.go);
+      });
+    });
+
+    $('#productsBody').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      if (btn.dataset.action === 'agent') {
+        $('#agentName').value = btn.dataset.name;
+        switchView('agent');
+      } else if (btn.dataset.action === 'workflow') {
+        $('#workflowProduct').value = btn.dataset.id;
+        switchView('workflow');
+      }
+    });
+
+    $('#agentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = $('#agentRunBtn');
+      btn.disabled = true;
+      const body = {
+        product_name: $('#agentName').value.trim(),
+        audience: $('#agentAudience').value.trim() || null,
+        scenario: $('#agentScenario').value.trim() || null,
+        sell: $('#agentSell').value.trim() || null,
+        mock: $('#agentMock').checked
+      };
+      const d = await apiPost('/api/agent/generate', body);
+      if (d.error) {
+        $('#agentResult').innerHTML = `<div class="error-box">${d.error}</div>`;
+      } else {
+        $('#agentResult').innerHTML = '<div class="empty">AI 生成中，请稍候...</div>';
+        startTask(d.task_id, renderAgentResult);
+      }
+      btn.disabled = false;
+    });
+
+    $('#workflowForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = $('#workflowRunBtn');
+      btn.disabled = true;
+      const d = await apiPost('/api/workflow/run', {
+        product_id: $('#workflowProduct').value,
+        mock: $('#workflowMock').checked
+      });
+      if (d.error) {
+        $('#workflowResult').innerHTML = `<div class="error-box">${d.error}</div>`;
+      } else {
+        $('#workflowResult').innerHTML = '<div class="empty">工作流运行中，每步会写入数据表...</div>';
+        startTask(d.task_id, renderWorkflowResult);
+      }
+      btn.disabled = false;
+    });
+
+    $('#analysisRunBtn').addEventListener('click', async () => {
+      const btn = $('#analysisRunBtn');
+      btn.disabled = true;
+      const d = await apiPost('/api/analysis/run', { mock: $('#analysisMock').checked });
+      if (d.error) {
+        $('#analysisResult').innerHTML = `<div class="error-box">${d.error}</div>`;
+      } else {
+        $('#analysisResult').innerHTML = '<div class="empty">AI 复盘生成中，请稍候...</div>';
+        startTask(d.task_id, renderAnalysisResult);
+      }
+      btn.disabled = false;
+    });
+
+    (function initView() {
+      const name = (location.hash || '').replace('#', '');
+      if (['overview', 'products', 'agent', 'workflow', 'analysis', 'knowledge'].includes(name)) {
+        switchView(name);
+      }
+    })();
+    loadHealth();
+    loadOverview();
+  </script>
+</body>
+</html>
