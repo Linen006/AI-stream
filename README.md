@@ -16,7 +16,7 @@
 ## 🖥️ 新版工作台
 
 <p align="center">
-  <img src="screenshots/dashboard.png" alt="AI短视频电商提效系统—今日工作台" width="100%">
+  <img src="screenshots/dashboard-v2.png" alt="AI短视频电商提效系统—今日工作台" width="100%">
 </p>
 
 > 左侧统一业务导航，首屏聚合快捷操作、核心指标、内容生产流程、近期产出和知识库资源。
@@ -50,11 +50,11 @@ python webui.py
 
 | 脚本助手 | 商品库 |
 | --- | --- |
-| ![脚本助手](screenshots/agent.png) | ![商品库](screenshots/products.png) |
+| ![脚本助手](screenshots/agent-v2.png) | ![商品库](screenshots/products-v2.png) |
 
 | 知识库 | 移动端导航 |
 | --- | --- |
-| ![知识库](screenshots/knowledge.png) | <p align="center"><img src="screenshots/mobile.png" alt="移动端导航" width="260"></p> |
+| ![知识库](screenshots/knowledge-v2.png) | <p align="center"><img src="screenshots/mobile-v2.png" alt="移动端导航" width="260"></p> |
 
 ## 🎬 三种玩法
 
