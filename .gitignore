@@ -1,6 +1,6 @@
 ﻿# 环境变量
 .env
-config.py
+/config.py
 
 # Python
 __pycache__/
