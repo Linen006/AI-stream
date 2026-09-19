@@ -13,6 +13,14 @@
 ![Tests](https://img.shields.io/badge/Tests-pytest-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
+## 🖥️ 新版工作台
+
+<p align="center">
+  <img src="screenshots/dashboard.png" alt="AI短视频电商提效系统—今日工作台" width="100%">
+</p>
+
+> 左侧统一业务导航，首屏聚合快捷操作、核心指标、内容生产流程、近期产出和知识库资源。
+
 ## ✨ 亮点一览：30 秒看完为什么用它
 
 独特能力 | 一句话
@@ -38,15 +46,15 @@ python webui.py
 浏览器自动打开 `http://127.0.0.1:8000`。页面里每个模块都可以单独勾选
 「离线演示」，不需要重启服务。
 
-## 界面预览
+## 📱 核心页面与移动端
 
-![概览](screenshots/dashboard.png)
+| 脚本助手 | 商品库 |
+| --- | --- |
+| ![脚本助手](screenshots/agent.png) | ![商品库](screenshots/products.png) |
 
-![脚本助手](screenshots/agent.png)
-
-![商品库](screenshots/products.png)
-
-![知识库](screenshots/knowledge.png)
+| 知识库 | 移动端导航 |
+| --- | --- |
+| ![知识库](screenshots/knowledge.png) | <p align="center"><img src="screenshots/mobile.png" alt="移动端导航" width="260"></p> |
 
 ## 🎬 三种玩法
 
