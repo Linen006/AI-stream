@@ -28,6 +28,8 @@ MIME_TYPES = {
     ".svg": "image/svg+xml",
     ".png": "image/png",
     ".ico": "image/x-icon",
+    ".woff": "font/woff",
+    ".woff2": "font/woff2",
 }
 
 
@@ -66,6 +68,8 @@ class AppHandler(BaseHTTPRequestHandler):
                 })
             elif path == "/api/overview":
                 self._overview()
+            elif path == "/api/recent":
+                self._recent()
             elif path == "/api/products":
                 _send_json(self, {"products": workflow_service.load_products()})
             elif path == "/api/knowledge":
@@ -112,6 +116,26 @@ class AppHandler(BaseHTTPRequestHandler):
             "total_revenue": round(total_revenue, 2),
             "overall_roi": overall_roi,
         })
+
+    def _recent(self) -> None:
+        """返回数据库中最近的脚本、视频与复盘，用于工作台概览。"""
+        sources = (
+            ("script", "scripts", "title", "review_status"),
+            ("video", "videos", "title", "status"),
+            ("review", "reviews", "period", "status"),
+        )
+        items = []
+        for item_type, table, title_field, status_field in sources:
+            rows = db.query_all(
+                f"SELECT id, {title_field} AS title, "
+                f"{status_field} AS status, updated_at FROM {table} "
+                "ORDER BY COALESCE(updated_at, '') DESC LIMIT 5"
+            )
+            for row in rows:
+                row["type"] = item_type
+                items.append(row)
+        items.sort(key=lambda item: item.get("updated_at") or "", reverse=True)
+        _send_json(self, {"items": items[:5]})
 
     # ---------- POST ----------
     def do_POST(self) -> None:
